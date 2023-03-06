@@ -31,6 +31,7 @@ public class LoanTransactionEnumData {
     private final String value;
 
     private final boolean disbursement;
+    private final boolean purchase;
     private final boolean repaymentAtDisbursement;
     private final boolean repayment;
     private final boolean merchantIssuedRefund;
@@ -58,6 +59,7 @@ public class LoanTransactionEnumData {
         this.id = id;
         this.code = code;
         this.value = value;
+        this.purchase = Long.valueOf(11).equals(this.id);
         this.disbursement = Long.valueOf(1).equals(this.id);
         this.repaymentAtDisbursement = Long.valueOf(5).equals(this.id);
         this.repayment = Long.valueOf(2).equals(this.id);

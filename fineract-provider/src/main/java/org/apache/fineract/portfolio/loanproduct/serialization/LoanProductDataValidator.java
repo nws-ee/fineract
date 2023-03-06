@@ -63,6 +63,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class LoanProductDataValidator {
 
+	public static final String ISLAMIC_FINANCE_PRODUCT_TYPE = "islamicFinanceProductType";
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
     public static final String FUND_ID = "fundId";
@@ -101,7 +102,7 @@ public final class LoanProductDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat", NAME, DESCRIPTION, FUND_ID,
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat", ISLAMIC_FINANCE_PRODUCT_TYPE, NAME, DESCRIPTION, FUND_ID,
             CURRENCY_CODE, DIGITS_AFTER_DECIMAL, IN_MULTIPLES_OF, PRINCIPAL, MIN_PRINCIPAL, MAX_PRINCIPAL, REPAYMENT_EVERY,
             NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE, INTEREST_RATE_PER_PERIOD,
             MIN_INTEREST_RATE_PER_PERIOD, MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE,
@@ -111,6 +112,7 @@ public final class LoanProductDataValidator {
             "closeDate", "externalId", IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID, INTEREST_RATE_DIFFERENTIAL,
             MIN_DIFFERENTIAL_LENDING_RATE, DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE,
             IS_FLOATING_INTEREST_RATE_CALCULATION_ALLOWED, "syncExpectedWithDisbursementDate",
+            LoanProductAccountingParams.PURSHASED_ASSET.getValue(),
             LoanProductAccountingParams.FEES_RECEIVABLE.getValue(), LoanProductAccountingParams.FUND_SOURCE.getValue(),
             LoanProductAccountingParams.INCOME_FROM_FEES.getValue(), LoanProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
             LoanProductAccountingParams.INTEREST_ON_LOANS.getValue(), LoanProductAccountingParams.INTEREST_RECEIVABLE.getValue(),
@@ -179,6 +181,9 @@ public final class LoanProductDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LOANPRODUCT);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final Integer islamicFinanceProductType = this.fromApiJsonHelper.extractIntegerNamed(ISLAMIC_FINANCE_PRODUCT_TYPE, element, Locale.getDefault());
+        baseDataValidator.reset().parameter(ISLAMIC_FINANCE_PRODUCT_TYPE).value(islamicFinanceProductType).notNull().inMinMaxRange(1, 2);
 
         final String name = this.fromApiJsonHelper.extractStringNamed(NAME, element);
         baseDataValidator.reset().parameter(NAME).value(name).notBlank().notExceedingLengthOf(100);
@@ -590,6 +595,11 @@ public final class LoanProductDataValidator {
 
         if (isCashBasedAccounting(accountingRuleType) || isAccrualBasedAccounting(accountingRuleType)) {
 
+            final Long purshasedAssetAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.PURSHASED_ASSET.getValue(),
+                    element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.PURSHASED_ASSET.getValue()).value(purshasedAssetAccountId).notNull()
+                    .integerGreaterThanZero();
+
             final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.FUND_SOURCE.getValue()).value(fundAccountId).notNull()
                     .integerGreaterThanZero();
@@ -982,6 +992,14 @@ public final class LoanProductDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LOANPRODUCT);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
+        
+        Integer islamicFinanceProductType = null;
+        if (this.fromApiJsonHelper.parameterExists(ISLAMIC_FINANCE_PRODUCT_TYPE, element)) {
+        	islamicFinanceProductType = this.fromApiJsonHelper.extractIntegerNamed(ISLAMIC_FINANCE_PRODUCT_TYPE, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(AMORTIZATION_TYPE).value(islamicFinanceProductType).notNull().inMinMaxRange(1, 3);
+        }
+
+
         if (this.fromApiJsonHelper.parameterExists(NAME, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(NAME, element);
             baseDataValidator.reset().parameter(NAME).value(name).notBlank().notExceedingLengthOf(100);
@@ -1419,6 +1437,11 @@ public final class LoanProductDataValidator {
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed(ACCOUNTING_RULE, element, Locale.getDefault());
         baseDataValidator.reset().parameter(ACCOUNTING_RULE).value(accountingRuleType).ignoreIfNull().inMinMaxRange(1, 4);
+
+        final Long purshasedAssetAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.PURSHASED_ASSET.getValue(),
+                element);
+        baseDataValidator.reset().parameter(LoanProductAccountingParams.PURSHASED_ASSET.getValue()).value(purshasedAssetAccountId).notNull()
+                .integerGreaterThanZero();
 
         final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
         baseDataValidator.reset().parameter(LoanProductAccountingParams.FUND_SOURCE.getValue()).value(fundAccountId).ignoreIfNull()

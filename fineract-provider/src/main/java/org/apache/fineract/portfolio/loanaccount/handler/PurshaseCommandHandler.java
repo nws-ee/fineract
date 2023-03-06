@@ -32,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOAN", action = "DISBURSE")
-public class DisburseLoanCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "LOAN", action = "PURCHASE")
+public class PurshaseCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
@@ -43,10 +43,10 @@ public class DisburseLoanCommandHandler implements NewCommandSourceHandler {
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
         try {
-            return this.writePlatformService.disburseLoan(false, command.entityId(), command, false);
+            return this.writePlatformService.disburseLoan(true, command.entityId(), command, false);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            dataIntegrityErrorHandler.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, "loan.disbursement",
-                    "Disbursement");
+            dataIntegrityErrorHandler.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, "loan.purchase",
+                    "Purchase");
             return CommandProcessingResult.empty();
         }
     }

@@ -29,6 +29,7 @@ public class LoanStatusEnumData {
     private final Long id;
     private final String code;
     private final String value;
+    private final boolean waitingForPurchase;
     private final boolean pendingApproval;
     private final boolean waitingForDisbursal;
     private final boolean active;
@@ -43,6 +44,7 @@ public class LoanStatusEnumData {
         this.code = code;
         this.value = value;
         this.pendingApproval = Long.valueOf(100).equals(this.id);
+        this.waitingForPurchase = Long.valueOf(301).equals(this.id);
         this.waitingForDisbursal = Long.valueOf(200).equals(this.id);
         this.active = Long.valueOf(300).equals(this.id);
         this.closedObligationsMet = Long.valueOf(600).equals(this.id);

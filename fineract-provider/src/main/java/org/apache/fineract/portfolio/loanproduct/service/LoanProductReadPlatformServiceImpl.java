@@ -203,6 +203,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         public String loanProductSchema() {
             return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_code as transactionStrategyCode, lp.loan_transaction_strategy_name as transactionStrategyName, "
+                    + "lp.islamic_finance_product_type as islamicFinanceProductType, "
                     + "lp.name as name, lp.short_name as shortName, lp.description as description, "
                     + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, lp.currency_multiplesof as inMultiplesOf, "
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.min_nominal_interest_rate_per_period as minInterestRatePerPeriod, lp.max_nominal_interest_rate_per_period as maxInterestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
@@ -264,6 +265,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
+
+            final Integer islamicFinanceProductTypeId = JdbcSupport.getInteger(rs, "islamicFinanceProductType");
+            final EnumOptionData islamicFinanceProductType = LoanEnumerations.islamicFinanceProductType(islamicFinanceProductTypeId);
             final String name = rs.getString("name");
             final String shortName = rs.getString("shortName");
             final String description = rs.getString("description");
@@ -482,7 +486,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final DelinquencyBucketData delinquencyBucket = new DelinquencyBucketData(delinquencyBucketId, delinquencyBucketName,
                     new ArrayList<>());
 
-            return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+            return new LoanProductData(id, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,

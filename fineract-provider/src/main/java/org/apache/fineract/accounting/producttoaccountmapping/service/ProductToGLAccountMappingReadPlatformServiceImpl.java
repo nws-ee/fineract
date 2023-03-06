@@ -120,6 +120,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
                 if (glAccountForLoan.equals(CashAccountsForLoan.FUND_SOURCE)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.FUND_SOURCE.getValue(), gLAccountData);
+                } else if (glAccountForLoan.equals(CashAccountsForLoan.PURSHASED_ASSET)) {
+                    accountMappingDetails.put(LoanProductAccountingDataParams.PURSHASED_ASSET.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_FEES)) {
                     accountMappingDetails.put(LoanProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CashAccountsForLoan.INCOME_FROM_PENALTIES)) {

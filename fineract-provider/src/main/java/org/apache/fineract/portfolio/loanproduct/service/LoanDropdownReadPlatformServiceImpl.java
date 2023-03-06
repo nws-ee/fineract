@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.service;
 
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.islamicFinanceProductType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
@@ -48,6 +49,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.IslamicFinanceProductType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
@@ -61,6 +63,12 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Override
+    public List<EnumOptionData> retrieveIslamicFinanceProductTypeOptions() {
+
+    	return Arrays.asList(islamicFinanceProductType(IslamicFinanceProductType.QARD_HASSAN), islamicFinanceProductType(IslamicFinanceProductType.MURABAHA));
+    }
+
+	@Override
     public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
 
         return Arrays.asList(amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS), amortizationType(AmortizationMethod.EQUAL_PRINCIPAL));

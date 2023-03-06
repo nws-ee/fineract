@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanWritePlatformService {
 
-    CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer);
+    CommandProcessingResult disburseLoan(Boolean isPurchase, Long loanId, JsonCommand command, Boolean isAccountTransfer);
 
     Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
             Boolean isAccountTransfer);

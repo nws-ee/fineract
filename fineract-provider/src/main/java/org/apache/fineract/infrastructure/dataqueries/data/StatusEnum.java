@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 public enum StatusEnum {
 
     CREATE("create", 100), APPROVE("approve", 200), ACTIVATE("activate", 300), WITHDRAWN("withdraw", 400), REJECTED("reject", 500), CLOSE(
-            "close", 600), WRITE_OFF("write off", 601), RESCHEDULE("reschedule", 602), OVERPAY("overpay", 700), DISBURSE("disburse", 800);
+            "close", 600), WRITE_OFF("write off", 601), RESCHEDULE("reschedule", 602), OVERPAY("overpay", 700), PURCHASE("purchase", 201), DISBURSE("disburse", 800);
 
     private final String name;
 
@@ -83,6 +83,9 @@ public enum StatusEnum {
             break;
             case 700:
                 ret = StatusEnum.OVERPAY;
+            break;
+            case 201:
+                ret = StatusEnum.PURCHASE;
             break;
             case 800:
                 ret = StatusEnum.DISBURSE;

@@ -2462,7 +2462,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return ids;
     }
 
-    public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
+    public ChangedTransactionDetail disburse(LoanEvent loanEvent,final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail) {
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
@@ -2493,20 +2493,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
          * Add an interest applied transaction of the interest is accrued upfront (Up front accrual), no accounting or
          * cash based accounting is selected
          **/
-
-        if (((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())
-                && isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-            ExternalId externalId = ExternalId.empty();
-            if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
-                externalId = ExternalId.generate();
-            }
-            final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                    actualDisbursementDate, externalId);
-            addLoanTransaction(interestAppliedTransaction);
+        if (LoanEvent.LOAN_DISBURSED.equals(loanEvent)) {
+	        if (((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())
+	                && isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+	            ExternalId externalId = ExternalId.empty();
+	            if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+	                externalId = ExternalId.generate();
+	            }
+	            final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
+	                    actualDisbursementDate, externalId);
+	            addLoanTransaction(interestAppliedTransaction);
+	        }
         }
 
         ChangedTransactionDetail result = reprocessTransactionForDisbursement();
-        this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, this);
+        this.loanLifecycleStateMachine.transition(loanEvent, this);
         actualChanges.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
         return result;
 
@@ -2576,10 +2577,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    public boolean canDisburse(final LocalDate actualDisbursementDate) {
+    public boolean canDisburse(final LocalDate actualDisbursementDate, LoanEvent loanEvent) {
         LocalDate lastDisburseDate = this.actualDisbursementDate;
-        final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSED, this);
+        final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(loanEvent, this);
 
+        // ISLAMIC: we are concerned by this block as we do not use multi disbusre, except perhaps for QardHassan
         boolean isMultiTrancheDisburse = false;
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
         if ((actualLoanStatus.isActive() || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid())
@@ -4069,6 +4071,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return getStatus().isSubmittedAndPendingApproval();
     }
 
+    public boolean isPurchased() {
+        return getStatus().isPurchased();
+    }
+
     public boolean isApproved() {
         return getStatus().isApproved();
     }
@@ -4125,6 +4131,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean isAllTranchesNotDisbursed() {
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
+        // TODO ISLAMIC: should we add actualLoanStatus.isPurchased() ||
         return this.loanProduct.isMultiDisburseLoan() && (actualLoanStatus.isActive() || actualLoanStatus.isApproved()
                 || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid()) && isDisbursementAllowed();
     }
@@ -5052,12 +5059,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     dataValidationErrors.add(error);
                 }
             break;
-            case LOAN_DISBURSED:
+            case LOAN_PURCHASED:
+            	// TODO ISLAMIC: r
                 if ((!(isApproved() && isNotDisbursed()) && !this.loanProduct.isMultiDisburseLoan())
                         || (this.loanProduct.isMultiDisburseLoan() && !isAllTranchesNotDisbursed())) {
-                    final String defaultUserMessage = "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
+                    final String defaultUserMessage = "Loan Purshase is not allowed. Loan Account is not in approved and not disbursed state.";
                     final ApiParameterError error = ApiParameterError
-                            .generalError("error.msg.loan.disbursal.account.is.not.approve.not.disbursed.state", defaultUserMessage);
+                            .generalError("error.msg.loan.puchase.account.is.not.approve.not.disbursed.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_DISBURSED:
+                if ((!(isPurchased() && isNotDisbursed()) && !this.loanProduct.isMultiDisburseLoan())
+                        || (this.loanProduct.isMultiDisburseLoan() && !isAllTranchesNotDisbursed())) {
+                    final String defaultUserMessage = "Loan Disbursal is not allowed. Loan Account is not in purchased and not disbursed state.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.disbursal.account.is.not.approve.not.purchased.state", defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             break;
