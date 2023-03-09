@@ -1120,6 +1120,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder purchaseLoanApplication(final Long loanId) {
+        this.actionName = "PURCHASE";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder disburseLoanApplication(final Long loanId) {
         this.actionName = "DISBURSE";
         this.entityName = "LOAN";

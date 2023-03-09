@@ -509,7 +509,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         final Money amount = Money.of(loan.getCurrency(), transactionAmount);
-        LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amount, paymentDetail, transactionDate,
+        // TODO ISLAMIC: check if we are concerned by this method "makeDisburseTransaction" and choose the right LoanTransactionType value (PURCHASE or DISBURSE
+        LoanTransaction disbursementTransaction = LoanTransaction.disbursement(LoanTransactionType.DISBURSEMENT, loan.getOffice(), amount, paymentDetail, transactionDate,
                 txnExternalId);
 
         // Subtract Previous loan outstanding balance from netDisbursalAmount

@@ -86,6 +86,11 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
 
         if (isCashBasedAccounting(accountingRuleType) || isAccrualBasedAccounting(accountingRuleType)) {
 
+            final Long purshasedAssetId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.PURSHASED_ASSET.getValue(),
+                    element);
+            baseDataValidator.reset().parameter(LoanProductAccountingParams.PURSHASED_ASSET.getValue()).value(purshasedAssetId).notNull()
+                    .integerGreaterThanZero();
+
             final Long fundAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductAccountingParams.FUND_SOURCE.getValue(), element);
             baseDataValidator.reset().parameter(LoanProductAccountingParams.FUND_SOURCE.getValue()).value(fundAccountId).notNull()
                     .integerGreaterThanZero();

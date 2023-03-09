@@ -88,6 +88,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "loan_transaction_strategy_name")
     private String transactionProcessingStrategyName;
 
+    @Column(name = "islamic_finance_product_type", nullable = false)
+    private Integer islamicFinanceProductType;
+
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
@@ -206,6 +209,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
 
+        final IslamicFinanceProductType islamicFinanceProductType = IslamicFinanceProductType.fromInt(1);
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
         final String description = command.stringValueOfParameterNamed("description");
@@ -373,7 +377,7 @@ public class LoanProduct extends AbstractPersistableCustom {
 
         final Integer overAppliedNumber = command.integerValueOfParameterNamed(LoanProductConstants.OVER_APPLIED_NUMBER);
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
                 repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment,
@@ -570,7 +574,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProductMinMaxConstraints = null;
     }
 
-    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode, final String name, final String shortName,
+    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode, final IslamicFinanceProductType islamicFinanceProductType, final String name, final String shortName,
             final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
@@ -602,6 +606,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final Integer overAppliedNumber) {
         this.fund = fund;
         this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
+        this.islamicFinanceProductType = islamicFinanceProductType.getValue();
         this.name = name.trim();
         this.shortName = shortName.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -857,6 +862,13 @@ public class LoanProduct extends AbstractPersistableCustom {
             final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
             actualChanges.put(accountingTypeParamName, newValue);
             this.accountingRule = newValue;
+        }
+
+        final String islamicFinanceProductTypeParamName = "islamicFinanceProductType";
+        if (command.isChangeInIntegerParameterNamed(islamicFinanceProductTypeParamName, this.islamicFinanceProductType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(islamicFinanceProductTypeParamName);
+            actualChanges.put(islamicFinanceProductTypeParamName, newValue);
+            this.islamicFinanceProductType = newValue;
         }
 
         final String nameParamName = "name";

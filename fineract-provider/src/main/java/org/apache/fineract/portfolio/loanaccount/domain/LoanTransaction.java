@@ -148,9 +148,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
-    public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
+    public static LoanTransaction disbursement(LoanTransactionType loanTransactionType, final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate disbursementDate, final ExternalId externalId) {
-        return new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate,
+        return new LoanTransaction(null, office, loanTransactionType, paymentDetail, amount.getAmount(), disbursementDate,
                 externalId);
     }
 

@@ -28,7 +28,7 @@ public enum EntityTables {
 
     CLIENT("m_client", ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.ACTIVATE.getCode(), StatusEnum.CLOSE.getCode()),
             "client_id"), LOAN("m_loan",
-                    ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.APPROVE.getCode(), StatusEnum.DISBURSE.getCode(),
+                    ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.APPROVE.getCode(), StatusEnum.PURCHASE.getCode(), StatusEnum.DISBURSE.getCode(),
                             StatusEnum.WITHDRAWN.getCode(), StatusEnum.REJECTED.getCode(), StatusEnum.WRITE_OFF.getCode()),
                     "loan_id"), GROUP("m_group",
                             ImmutableList.of(StatusEnum.CREATE.getCode(), StatusEnum.ACTIVATE.getCode(), StatusEnum.CLOSE.getCode()),

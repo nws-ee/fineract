@@ -104,6 +104,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "2")
         public Integer interestRateFrequencyType;
         @Schema(example = "1")
+        public Integer islamicFinanceProductType;
+        @Schema(example = "1")
         public Integer amortizationType;
         @Schema(example = "0")
         public Integer interestType;
@@ -352,6 +354,18 @@ final class LoanProductsApiResourceSwagger {
             public String description;
         }
 
+        static final class GetIslamicFinanceProductType {
+
+            private GetIslamicFinanceProductType() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "islamicFinanceProductType.murabaha")
+            public String code;
+            @Schema(example = "MURABAHA")
+            public String description;
+        }
+
         static final class GetLoanProductsInterestType {
 
             private GetLoanProductsInterestType() {}
@@ -520,6 +534,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "15.000000")
         public Double annualInterestRate;
+        public GetIslamicFinanceProductType islamicFinanceProductType;
         public GetLoanProductsAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
@@ -963,6 +978,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsTemplateCurrency currency;
         public GetLoanProductsRepaymentTemplateFrequencyType repaymentFrequencyType;
         public GetLoanProductsInterestRateTemplateFrequencyType interestRateFrequencyType;
+        public GetLoanProductsResponse.GetIslamicFinanceProductType islamicFinanceProductType;
         public GetLoanProductsResponse.GetLoanProductsAmortizationType amortizationType;
         public GetLoanProductsInterestTemplateType interestType;
         public GetLoanProductsResponse.GetLoansProductsInterestCalculationPeriodType interestCalculationPeriodType;
@@ -983,6 +999,7 @@ final class LoanProductsApiResourceSwagger {
         public Set<GetLoanProductsRepaymentTemplateFrequencyType> repaymentFrequencyTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsInterestRecalculationData.GetLoanProductsPreClosureInterestCalculationStrategy> preClosureInterestCalculationStrategyOptions;
         public Set<GetLoanProductsInterestRateTemplateFrequencyType> interestRateFrequencyTypeOptions;
+        public Set<GetLoanProductsResponse.GetIslamicFinanceProductType> islamicFinanceProductTypeOptions;
         public Set<GetLoanProductsResponse.GetLoanProductsAmortizationType> amortizationTypeOptions;
         public Set<GetLoanProductsInterestTemplateType> interestTypeOptions;
         public Set<GetLoanProductsResponse.GetLoansProductsInterestCalculationPeriodType> interestCalculationPeriodTypeOptions;
@@ -1152,6 +1169,7 @@ final class LoanProductsApiResourceSwagger {
         public GetLoanProductsProductIdResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "60.000000")
         public Double annualInterestRate;
+        public GetLoanProductsResponse.GetIslamicFinanceProductType islamicFinanceProductType;
         public GetLoanProductsResponse.GetLoanProductsAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;

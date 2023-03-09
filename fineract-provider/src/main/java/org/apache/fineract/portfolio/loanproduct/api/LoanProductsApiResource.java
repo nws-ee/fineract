@@ -92,7 +92,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanProductsApiResource {
 
-    private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description",
+    private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "islamicFinanceProductType", "name", "shortName", "description",
             "fundId", "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod",
@@ -100,7 +100,7 @@ public class LoanProductsApiResource {
             "interestType", "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             "inArrearsTolerance", "transactionProcessingStrategyCode", "transactionProcessingStrategyName", "charges", "accountingRule",
             "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
-            "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
+            "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "islamicFinanceProductTypeOptions", "amortizationTypeOptions",
             "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
             "accountingOptions", "accountingRuleOptions", "accountingMappingOptions", "floatingRateOptions",
             "isLinkedToFloatingInterestRates", "floatingRatesId", "interestRateDifferential", "minDifferentialLendingRate",
@@ -140,10 +140,10 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Loan Product", description = "Depending of the Accounting Rule (accountingRule) selected, additional fields with details of the appropriate Ledger Account identifiers would need to be passed in.\n"
             + "\n" + "Refer MifosX Accounting Specs Draft for more details regarding the significance of the selected accounting rule\n\n"
-            + "Mandatory Fields: name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType\n\n"
+            + "Mandatory Fields: islamicFinanceProductType, name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType\n\n"
             + "Optional Fields: inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, graceOnArrearsAgeing, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle, useBorrowerCycle,principalVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle, multiDisburseLoan,maxTrancheCount, outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion\n\n"
-            + "Additional Mandatory Fields for Cash(2) based accounting: fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
-            + "Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting: fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId, receivablePenaltyAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
+            + "Additional Mandatory Fields for Cash(2) based accounting: purshasedAssetAccountId, fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
+            + "Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting: purshasedAssetAccountId, fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId, receivablePenaltyAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
             + "Additional Mandatory Fields if interest recalculation is enabled(true): interestRecalculationCompoundingMethod, rescheduleStrategyMethod, recalculationRestFrequencyType\n\n"
             + "Additional Optional Fields if interest recalculation is enabled(true): isArrearsBasedOnOriginalSchedule, preClosureInterestCalculationStrategy\n\n"
             + "Additional Optional Fields if interest recalculation is enabled(true) and recalculationRestFrequencyType is not same as repayment period: recalculationRestFrequencyInterval, recalculationRestFrequencyDate\n\n"
@@ -293,6 +293,7 @@ public class LoanProductsApiResource {
         }
 
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        final List<EnumOptionData> islamicFinanceProductTypeOptions = this.dropdownReadPlatformService.retrieveIslamicFinanceProductTypeOptions();
         final List<EnumOptionData> amortizationTypeOptions = this.dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
         final List<EnumOptionData> interestTypeOptions = this.dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
         final List<EnumOptionData> interestCalculationPeriodTypeOptions = this.dropdownReadPlatformService
@@ -339,7 +340,7 @@ public class LoanProductsApiResource {
                 .retrievePreCloseInterestCalculationStrategyOptions();
         final List<FloatingRateData> floatingRateOptions = this.floatingRateReadPlatformService.retrieveLookupActive();
 
-        return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
+        return new LoanProductData(productData, islamicFinanceProductTypeOptions, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
                 fundOptions, transactionProcessingStrategyOptions, rateOptions, accountOptions, accountingRuleTypeOptions,
                 loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,

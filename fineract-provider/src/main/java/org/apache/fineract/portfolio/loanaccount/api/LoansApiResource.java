@@ -1111,6 +1111,8 @@ public class LoansApiResource {
             commandRequest = builder.withdrawLoanApplication(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "approve")) {
             commandRequest = builder.approveLoanApplication(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "purchase")) {
+            commandRequest = builder.purchaseLoanApplication(loanId).build();
         } else if (CommandParameterUtil.is(commandParam, "disburse")) {
             commandRequest = builder.disburseLoanApplication(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, "disburseToSavings")) {

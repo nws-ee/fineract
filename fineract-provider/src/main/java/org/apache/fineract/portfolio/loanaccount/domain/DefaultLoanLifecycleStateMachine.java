@@ -81,8 +81,13 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                     newState = withdrawnByClientTransition();
                 }
             break;
-            case LOAN_DISBURSED:
+            case LOAN_PURCHASED:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                    newState = purchaseTransition();
+                }
+            break;
+            case LOAN_DISBURSED:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.PURCHASED, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
                     newState = activeTransition();
                 }
             break;
@@ -198,6 +203,10 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     private LoanStatus activeTransition() {
         return stateOf(LoanStatus.ACTIVE, ALLOWED_LOAN_STATUSES);
+    }
+
+    private LoanStatus purchaseTransition() {
+        return stateOf(LoanStatus.PURCHASED, ALLOWED_LOAN_STATUSES);
     }
 
     private LoanStatus withdrawnByClientTransition() {

@@ -36,6 +36,7 @@ public final class AccountingConstants {
      ***/
     public enum CashAccountsForLoan {
 
+		PURSHASED_ASSET(51),
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(
                 6), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
                         14), INCOME_FROM_CHARGE_OFF_FEES(
@@ -75,7 +76,8 @@ public final class AccountingConstants {
      ***/
     public enum AccrualAccountsForLoan {
 
-        FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), //
+    	PURSHASED_ASSET(51),
+    	FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), //
         LOSSES_WRITTEN_OFF(6), INTEREST_RECEIVABLE(7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), //
         TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12), GOODWILL_CREDIT(13), INCOME_FROM_CHARGE_OFF_INTEREST(
                 14), INCOME_FROM_CHARGE_OFF_FEES(
@@ -116,7 +118,8 @@ public final class AccountingConstants {
      ***/
     public enum LoanProductAccountingParams {
 
-        FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS(
+    	PURSHASED_ASSET("purshasedAssetAccountId"),
+    	FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS(
                 "interestOnLoanAccountId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), INCOME_FROM_PENALTIES(
                         "incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), GOODWILL_CREDIT(
                                 "goodwillCreditAccountId"), OVERPAYMENT("overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE(
@@ -154,7 +157,8 @@ public final class AccountingConstants {
 
     public enum LoanProductAccountingDataParams {
 
-        FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS(
+    	PURSHASED_ASSET("purshasedAssetAccount"),
+    	FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS(
                 "interestOnLoanAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
                         "incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), GOODWILL_CREDIT(
                                 "goodwillCreditAccount"), OVERPAYMENT("overpaymentLiabilityAccount"), INTEREST_RECEIVABLE(

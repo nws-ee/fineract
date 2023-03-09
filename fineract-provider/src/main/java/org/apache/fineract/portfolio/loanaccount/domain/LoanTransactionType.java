@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 public enum LoanTransactionType {
 
     INVALID(0, "loanTransactionType.invalid"), //
+    PURCHASE(11, "loanTransactionType.purchase"), //
     DISBURSEMENT(1, "loanTransactionType.disbursement"), //
     REPAYMENT(2, "loanTransactionType.repayment"), //
     CONTRA(3, "loanTransactionType.contra"), //
@@ -76,7 +77,8 @@ public enum LoanTransactionType {
         }
 
         return switch (transactionType) {
-            case 1 -> LoanTransactionType.DISBURSEMENT;
+	        case 1 -> LoanTransactionType.DISBURSEMENT;
+	        case 11 -> LoanTransactionType.PURCHASE;
             case 2 -> LoanTransactionType.REPAYMENT;
             case 3 -> LoanTransactionType.CONTRA;
             case 4 -> LoanTransactionType.WAIVE_INTEREST;
@@ -112,6 +114,10 @@ public enum LoanTransactionType {
 
     public String getCode() {
         return this.code;
+    }
+
+    public boolean isPurchase() {
+        return this.equals(LoanTransactionType.PURCHASE);
     }
 
     public boolean isDisbursement() {

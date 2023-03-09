@@ -58,6 +58,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             /** Handle Disbursements and reversals of disbursements **/
             if (loanTransactionDTO.getTransactionType().isDisbursement()) {
                 createJournalEntriesForDisbursements(loanDTO, loanTransactionDTO, office);
+            } else if (loanTransactionDTO.getTransactionType().isPurchase()) {
+                createJournalEntriesForPurchase(loanDTO, loanTransactionDTO, office);
             }
             /***
              * Logic for repayments, repayments at disbursement and reversal of Repayments and Repayments at
@@ -439,6 +441,45 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     /**
+     * Debit "purchased asset" and credit Fund source for a Purchase <br/>
+     *
+     * All debits are turned into credits and vice versa in case of purchase reversals
+     *
+     *
+     * @param loanDTO
+     * @param loanTransactionDTO
+     * @param office
+     */
+    private void createJournalEntriesForPurchase(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+        if (loanTransactionDTO.isLoanToLoanTransfer()) {
+            this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    FinancialActivity.ASSET_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    disbursalAmount, isReversal);
+        } else if (loanTransactionDTO.isAccountTransfer()) {
+            this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                    FinancialActivity.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    disbursalAmount, isReversal);
+        } else {
+            this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.PURSHASED_ASSET.getValue(),
+                    CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    disbursalAmount, isReversal);
+        }
+
+    }
+
+    /**
      * Debit loan Portfolio and credit Fund source for a Disbursement <br/>
      *
      * All debits are turned into credits and vice versa in case of disbursement reversals
@@ -471,7 +512,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     disbursalAmount, isReversal);
         } else {
             this.helper.createJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
-                    CashAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                    CashAccountsForLoan.PURSHASED_ASSET.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                     disbursalAmount, isReversal);
         }
 

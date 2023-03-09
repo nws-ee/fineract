@@ -26,6 +26,7 @@ public enum LoanStatus {
     INVALID(0, "loanStatusType.invalid"), //
     SUBMITTED_AND_PENDING_APPROVAL(100, "loanStatusType.submitted.and.pending.approval"), //
     APPROVED(200, "loanStatusType.approved"), //
+    PURCHASED(301, "loanStatusType.purchased"), //
     ACTIVE(300, "loanStatusType.active"), //
     TRANSFER_IN_PROGRESS(303, "loanStatusType.transfer.in.progress"), //
     TRANSFER_ON_HOLD(304, "loanStatusType.transfer.on.hold"), //
@@ -51,6 +52,9 @@ public enum LoanStatus {
             break;
             case 300:
                 enumeration = LoanStatus.ACTIVE;
+            break;
+            case 301:
+                enumeration = LoanStatus.PURCHASED;
             break;
             case 303:
                 enumeration = LoanStatus.TRANSFER_IN_PROGRESS;
@@ -99,6 +103,10 @@ public enum LoanStatus {
 
     public boolean isSubmittedAndPendingApproval() {
         return this.value.equals(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue());
+    }
+
+    public boolean isPurchased() {
+        return this.value.equals(LoanStatus.PURCHASED.getValue());
     }
 
     public boolean isApproved() {

@@ -63,6 +63,7 @@ import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChe
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAcceptTransferBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanChargebackTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseAsRescheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
@@ -257,7 +258,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         CommandProcessingResult result = null;
         int count = 0;
         for (Loan loan : childLoans) {
-            result = disburseLoan(loan.getId(), command, false);
+        	// TODO ISLAMIC purchase/disburse
+            result = disburseLoan(true, loan.getId(), command, false);
             if (result.getLoanId() != null) {
                 count++;
                 // if all the child loans are approved, mark the parent loan as
@@ -273,8 +275,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command, Boolean isAccountTransfer) {
-
+    public CommandProcessingResult disburseLoan(Boolean isPurchase, final Long loanId, final JsonCommand command, Boolean isAccountTransfer) {
         final AppUser currentUser = getAppUserIfPresent();
 
         this.loanEventApiJsonValidator.validateDisbursement(command.json(), isAccountTransfer);
@@ -285,6 +286,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
+        
+        LoanEvent loanEvent;
+        StatusEnum statusEnum;
+        LoanBusinessEvent loanBusinessEvent;
+        LoanTransactionType loanTransactionType;
+        if(isPurchase) {
+        	loanEvent = LoanEvent.LOAN_PURCHASED;
+        	statusEnum = StatusEnum.PURCHASE;
+        	loanBusinessEvent = new LoanDisbursalBusinessEvent(loan); 
+        	loanTransactionType = LoanTransactionType.PURCHASE;
+        } else {
+        	loanEvent = LoanEvent.LOAN_DISBURSED;
+        	statusEnum = StatusEnum.DISBURSE;
+        	loanBusinessEvent = new LoanDisbursalBusinessEvent(loan);
+        	loanTransactionType = LoanTransactionType.DISBURSEMENT;
+        }
         // Fail fast if client/group is not active or actual loan status disallows disbursal
         checkClientOrGroupActive(loan);
 
@@ -312,29 +329,32 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.getAllDisbursementDetails().add(disbursementDetail);
             }
         }
-        loan.validateAccountStatus(LoanEvent.LOAN_DISBURSED);
+        loan.validateAccountStatus(loanEvent);
 
-        // Get disbursedAmount
-        final BigDecimal disbursedAmount = loan.getDisbursedAmount();
-        final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
-
-        // Get relevant loan collateral modules
-        if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty())
-                && AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
-
-            BigDecimal totalCollateral = BigDecimal.valueOf(0);
-
-            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
-                BigDecimal quantity = loanCollateralManagement.getQuantity();
-                BigDecimal pctToBase = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getPctToBase();
-                BigDecimal basePrice = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getBasePrice();
-                totalCollateral = totalCollateral.add(quantity.multiply(basePrice).multiply(pctToBase).divide(BigDecimal.valueOf(100)));
-            }
-
-            // Validate the loan collateral value against the disbursedAmount
-            if (disbursedAmount.compareTo(totalCollateral) > 0) {
-                throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
-            }
+        // TODO ISLAMIC: should we verify/take collateral before purchase or wait for selling ?
+        if(isPurchase) {
+	        // Get disbursedAmount
+	        final BigDecimal disbursedAmount = loan.getDisbursedAmount();
+	        final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+	
+	        // Get relevant loan collateral modules
+	        if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty())
+	                && AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+	
+	            BigDecimal totalCollateral = BigDecimal.valueOf(0);
+	
+	            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+	                BigDecimal quantity = loanCollateralManagement.getQuantity();
+	                BigDecimal pctToBase = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getPctToBase();
+	                BigDecimal basePrice = loanCollateralManagement.getClientCollateralManagement().getCollaterals().getBasePrice();
+	                totalCollateral = totalCollateral.add(quantity.multiply(basePrice).multiply(pctToBase).divide(BigDecimal.valueOf(100)));
+	            }
+	
+	            // Validate the loan collateral value against the disbursedAmount
+	            if (disbursedAmount.compareTo(totalCollateral) > 0) {
+	                throw new LoanCollateralAmountNotSufficientException(disbursedAmount);
+	            }
+	        }
         }
 
         // validate ActualDisbursement Date Against Expected Disbursement Date
@@ -346,8 +366,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate nextPossibleRepaymentDate = loan.getNextPossibleRepaymentDateForRescheduling();
         final LocalDate rescheduledRepaymentDate = command.localDateValueOfParameterNamed("adjustRepaymentDate");
 
-        entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
-                StatusEnum.DISBURSE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
+    	entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
+    			statusEnum.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         LocalDate recalculateFrom = null;
         if (!loan.isMultiDisburmentLoan()) {
@@ -363,7 +383,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(), scheduleGeneratorDTO.getNumberOfdays());
         }
 
-        businessEventNotifierService.notifyPreBusinessEvent(new LoanDisbursalBusinessEvent(loan));
+        businessEventNotifierService.notifyPreBusinessEvent(loanBusinessEvent);
 
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -371,9 +391,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-        if (paymentDetail != null && paymentDetail.getPaymentType() != null && paymentDetail.getPaymentType().getIsCashPayment()) {
-            BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-            this.cashierTransactionDataValidator.validateOnLoanDisbursal(currentUser, loan.getCurrencyCode(), transactionAmount);
+        if(isPurchase) {
+	        if (paymentDetail != null && paymentDetail.getPaymentType() != null && paymentDetail.getPaymentType().getIsCashPayment()) {
+	            BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+	            this.cashierTransactionDataValidator.validateOnLoanDisbursal(currentUser, loan.getCurrencyCode(), transactionAmount);
+	        }
         }
         final boolean isPaymentTypeApplicableForDisbursementCharge = configurationDomainService
                 .isPaymentTypeApplicableForDisbursementCharge();
@@ -381,7 +403,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // Recalculate first repayment date based in actual disbursement date.
         updateLoanCounters(loan, actualDisbursementDate);
         Money amountBeforeAdjust = loan.getPrincipal();
-        boolean canDisburse = loan.canDisburse(actualDisbursementDate);
+        boolean canDisburse = loan.canDisburse(actualDisbursementDate, loanEvent);
         ChangedTransactionDetail changedTransactionDetail = null;
         if (canDisburse) {
 
@@ -396,6 +418,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
             final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
+            // ISLAMIC: we are not concerned by Topup loans
             if (loan.isTopup() && loan.getClientId() != null) {
                 final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
                 final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
@@ -424,6 +447,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 disburseLoanToLoan(loan, command, loanOutstanding);
             }
 
+            // ISLAMIC: we are not concerned by disbursing Loan to saving accounts
             if (isAccountTransfer) {
                 disburseLoanToSavings(loan, command, amountToDisburse, paymentDetail);
                 existingTransactionIds.addAll(loan.findExistingTransactionIds());
@@ -431,7 +455,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             } else {
                 existingTransactionIds.addAll(loan.findExistingTransactionIds());
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amountToDisburse, paymentDetail,
+                LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loanTransactionType, loan.getOffice(), amountToDisburse, paymentDetail,
                         actualDisbursementDate, txnExternalId);
                 disbursementTransaction.updateLoan(loan);
                 loan.addLoanTransaction(disbursementTransaction);
@@ -449,9 +473,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
             }
             if (isPaymentTypeApplicableForDisbursementCharge) {
-                changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
+                changedTransactionDetail = loan.disburse(loanEvent, currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
             } else {
-                changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, null);
+                changedTransactionDetail = loan.disburse(loanEvent, currentUser, command, changes, scheduleGeneratorDTO, null);
             }
 
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
@@ -474,7 +498,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.noteRepository.save(note);
             }
             // auto create standing instruction
-            createStandingInstruction(loan);
+            if (loanEvent == LoanEvent.LOAN_DISBURSED) {
+            	createStandingInstruction(loan);
+            }
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
@@ -699,7 +725,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // disbursement and actual disbursement happens on same date
             loan.validateAccountStatus(LoanEvent.LOAN_DISBURSED);
             updateLoanCounters(loan, actualDisbursementDate);
-            boolean canDisburse = loan.canDisburse(actualDisbursementDate);
+            // TODO ISLAMIC: manage bulk Murabaha
+            boolean canDisburse = loan.canDisburse(actualDisbursementDate, LoanEvent.LOAN_DISBURSED);
             ChangedTransactionDetail changedTransactionDetail = null;
             if (canDisburse) {
                 Money amountBeforeAdjust = loan.getPrincipal();
@@ -714,7 +741,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 } else {
                     existingTransactionIds.addAll(loan.findExistingTransactionIds());
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
-                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
+                    // TODO ISLAMIC: manage bulk Murabaha
+                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(LoanTransactionType.DISBURSEMENT, loan.getOffice(), disburseAmount, paymentDetail,
                             actualDisbursementDate, txnExternalId);
                     disbursementTransaction.updateLoan(loan);
                     loan.addLoanTransaction(disbursementTransaction);
@@ -728,10 +756,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 }
+                // TODO ISLAMIC: manage bulk Murabaha
                 if (configurationDomainService.isPaymentTypeApplicableForDisbursementCharge()) {
-                    changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
+                    changedTransactionDetail = loan.disburse(LoanEvent.LOAN_DISBURSED, currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
                 } else {
-                    changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, null);
+                    changedTransactionDetail = loan.disburse(LoanEvent.LOAN_DISBURSED, currentUser, command, changes, scheduleGeneratorDTO, null);
                 }
             }
             if (!changes.isEmpty()) {

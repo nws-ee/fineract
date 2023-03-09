@@ -25,6 +25,7 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 
 public interface LoanDropdownReadPlatformService {
 
+	List<EnumOptionData> retrieveIslamicFinanceProductTypeOptions();
     List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
 
     List<EnumOptionData> retrieveLoanInterestTypeOptions();

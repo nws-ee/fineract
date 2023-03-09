@@ -60,6 +60,7 @@ import org.springframework.util.CollectionUtils;
 public class LoanProductData implements Serializable {
 
     private final Long id;
+    private final EnumOptionData islamicFinanceProductType;
     private final String name;
     private final String shortName;
     private final String description;
@@ -142,6 +143,7 @@ public class LoanProductData implements Serializable {
     private final Collection<RateData> rates;
 
     // template related
+    private final List<EnumOptionData> islamicFinanceProductTypeOptions;
     private final Collection<FundData> fundOptions;
     private final Collection<PaymentTypeData> paymentTypeOptions;
     private final Collection<CurrencyData> currencyOptions;
@@ -194,6 +196,7 @@ public class LoanProductData implements Serializable {
      * Used when returning lookup information about loan product for dropdowns.
      */
     public static LoanProductData lookup(final Long id, final String name, final Boolean multiDisburseLoan) {
+        final EnumOptionData islamicFinanceProductType = null;
         final String shortName = null;
         final String description = null;
         final CurrencyData currency = null;
@@ -277,7 +280,7 @@ public class LoanProductData implements Serializable {
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
 
-        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+        return new LoanProductData(id, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
@@ -298,6 +301,7 @@ public class LoanProductData implements Serializable {
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
+        final EnumOptionData islamicFinanceProductType = null;
         final String shortName = null;
         final String description = null;
         final BigDecimal principal = null;
@@ -382,7 +386,7 @@ public class LoanProductData implements Serializable {
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
 
-        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+        return new LoanProductData(id, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
@@ -404,6 +408,7 @@ public class LoanProductData implements Serializable {
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
         final Long id = null;
+        final EnumOptionData islamicFinanceProductType = null;
         final String name = null;
         final String shortName = null;
         final String description = null;
@@ -494,7 +499,7 @@ public class LoanProductData implements Serializable {
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
 
-        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+        return new LoanProductData(id, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
@@ -519,6 +524,7 @@ public class LoanProductData implements Serializable {
             final BigDecimal interestRateDifferential, final BigDecimal minDifferentialLendingRate,
             final BigDecimal defaultDifferentialLendingRate, final BigDecimal maxDifferentialLendingRate,
             final boolean isFloatingInterestRateCalculationAllowed) {
+        final EnumOptionData islamicFinanceProductType = null;
         final String shortName = null;
         final String description = null;
         final CurrencyData currency = CurrencyData.blank();
@@ -600,7 +606,7 @@ public class LoanProductData implements Serializable {
         final Collection<DelinquencyBucketData> delinquencyBucketOptions = null;
         final DelinquencyBucketData delinquencyBucket = null;
 
-        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+        return new LoanProductData(id, islamicFinanceProductType, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
@@ -631,7 +637,7 @@ public class LoanProductData implements Serializable {
         return productData;
     }
 
-    public LoanProductData(final Long id, final String name, final String shortName, final String description, final CurrencyData currency,
+    public LoanProductData(final Long id, final EnumOptionData islamicFinanceProductType, final String name, final String shortName, final String description, final CurrencyData currency,
             final BigDecimal principal, final BigDecimal minPrincipal, final BigDecimal maxPrincipal, final BigDecimal tolerance,
             final Integer numberOfRepayments, final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments,
             final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal minInterestRatePerPeriod,
@@ -664,6 +670,7 @@ public class LoanProductData implements Serializable {
             final BigDecimal fixedPrincipalPercentagePerInstallment, final Collection<DelinquencyBucketData> delinquencyBucketOptions,
             final DelinquencyBucketData delinquencyBucket) {
         this.id = id;
+        this.islamicFinanceProductType = islamicFinanceProductType;
         this.name = name;
         this.shortName = shortName;
         this.description = description;
@@ -718,6 +725,7 @@ public class LoanProductData implements Serializable {
         this.rates = rates;
         this.isRatesEnabled = isRatesEnabled;
 
+    	this.islamicFinanceProductTypeOptions = null;
         this.chargeOptions = null;
         this.penaltyOptions = null;
         this.paymentTypeOptions = null;
@@ -780,7 +788,7 @@ public class LoanProductData implements Serializable {
         this.delinquencyBucket = delinquencyBucket;
     }
 
-    public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
+    public LoanProductData(final LoanProductData productData, final List<EnumOptionData> islamicFinanceProductTypeOptions, final Collection<ChargeData> chargeOptions,
             final Collection<ChargeData> penaltyOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
             final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
@@ -796,6 +804,8 @@ public class LoanProductData implements Serializable {
             final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions, final boolean isRatesEnabled,
             final Collection<DelinquencyBucketData> delinquencyBucketOptions) {
         this.id = productData.id;
+		this.islamicFinanceProductType = productData.islamicFinanceProductType;
+		this.islamicFinanceProductTypeOptions = islamicFinanceProductTypeOptions;
         this.name = productData.name;
         this.shortName = productData.shortName;
         this.description = productData.description;

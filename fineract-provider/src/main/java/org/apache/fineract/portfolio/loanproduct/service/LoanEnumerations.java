@@ -33,6 +33,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.IslamicFinanceProductType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
@@ -188,6 +189,15 @@ public final class LoanEnumerations {
         };
     }
 
+    public static EnumOptionData islamicFinanceProductType(final Integer id) {
+        return islamicFinanceProductType(IslamicFinanceProductType.fromInt(id));
+    }
+
+    public static EnumOptionData islamicFinanceProductType(final IslamicFinanceProductType type) {
+        final EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
+        return optionData;
+    }
+
     public static EnumOptionData amortizationType(final Integer id) {
         return amortizationType(AmortizationMethod.fromInt(id));
     }
@@ -240,6 +250,8 @@ public final class LoanEnumerations {
         return switch (type) {
             case INVALID -> new LoanTransactionEnumData(LoanTransactionType.INVALID.getValue().longValue(),
                     LoanTransactionType.INVALID.getCode(), "Invalid");
+            case PURCHASE -> new LoanTransactionEnumData(LoanTransactionType.PURCHASE.getValue().longValue(),
+                    LoanTransactionType.PURCHASE.getCode(), "Purchase");
             case DISBURSEMENT -> new LoanTransactionEnumData(LoanTransactionType.DISBURSEMENT.getValue().longValue(),
                     LoanTransactionType.DISBURSEMENT.getCode(), "Disbursement");
             case REPAYMENT -> new LoanTransactionEnumData(LoanTransactionType.REPAYMENT.getValue().longValue(),
@@ -315,6 +327,7 @@ public final class LoanEnumerations {
             case SUBMITTED_AND_PENDING_APPROVAL -> new LoanStatusEnumData(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
                     LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
             case APPROVED -> new LoanStatusEnumData(LoanStatus.APPROVED.getValue().longValue(), LoanStatus.APPROVED.getCode(), "Approved");
+            case PURCHASED -> new LoanStatusEnumData(LoanStatus.PURCHASED.getValue().longValue(), LoanStatus.PURCHASED.getCode(), "Purchased");
             case ACTIVE -> new LoanStatusEnumData(LoanStatus.ACTIVE.getValue().longValue(), LoanStatus.ACTIVE.getCode(), "Active");
             case REJECTED -> new LoanStatusEnumData(LoanStatus.REJECTED.getValue().longValue(), LoanStatus.REJECTED.getCode(), "Rejected");
             case WITHDRAWN_BY_CLIENT -> new LoanStatusEnumData(LoanStatus.WITHDRAWN_BY_CLIENT.getValue().longValue(),

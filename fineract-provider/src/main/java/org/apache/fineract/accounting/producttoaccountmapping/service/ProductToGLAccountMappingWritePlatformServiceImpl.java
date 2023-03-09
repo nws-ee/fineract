@@ -67,6 +67,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId, CashAccountsForLoan.FUND_SOURCE.getValue());
                 // asset
                 this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                        LoanProductAccountingParams.PURSHASED_ASSET.getValue(), loanProductId,
+                        CashAccountsForLoan.PURSHASED_ASSET.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), loanProductId,
                         CashAccountsForLoan.LOAN_PORTFOLIO.getValue());
                 this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
@@ -126,6 +129,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId, CashAccountsForLoan.FUND_SOURCE.getValue());
 
                 // assets (including receivables)
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                        LoanProductAccountingParams.PURSHASED_ASSET.getValue(), loanProductId,
+                        AccrualAccountsForLoan.PURSHASED_ASSET.getValue());
                 this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), loanProductId,
                         AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue());
